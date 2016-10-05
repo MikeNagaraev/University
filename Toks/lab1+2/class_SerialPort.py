@@ -2,7 +2,10 @@
 
 
 import serial
-import Help
+import help_module
+import bit_stuffing
+from bitstring import BitArray
+
 class SerialPort:
 
     def __init__(self, name):
@@ -17,11 +20,11 @@ class SerialPort:
         self.ser.baudrate = int(value)
 
     def read_from_port(self):
-        return self.ser.read(Help.X)
+        return bit_stuffing.back_convert(BitArray(self.ser.read(help_module.X)).bin)
 
     def write_to_port(self,str,length):
-        Help.X = length
-        self.ser.write(str.encode())
+        help_module.X = length
+        self.ser.write(str)
 
     def name(self):
         self.name

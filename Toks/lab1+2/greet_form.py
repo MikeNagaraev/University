@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
-import SerialPort
-import Help
+import class_SerialPort
+import help_module
+import bit_stuffing
 import time
-from SerialPort import SerialPort
+from class_SerialPort import SerialPort
 import _thread
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QComboBox,QRadioButton, QLabel, QVBoxLayout, QLineEdit, QPushButton, QTextEdit
@@ -19,7 +20,6 @@ class GreetForm(QWidget):
     def initUI(self):
         self.create_name_port()
         self.create_combo()
-        # self.create_mode()
         self.create_dialog()
         self.create_message()
         self.create_okay_button()
@@ -50,26 +50,6 @@ class GreetForm(QWidget):
         self.label_rate.move(self.label_rate.x,self.label_rate.y)
         self.combo.move(self.combo.x, self.combo.y)
 
-    # def create_mode(self):
-
-    #     label_mode = QLabel("Mode:",self)
-    #     label_mode.x = 200
-    #     label_mode.y = 20
-    #     label_mode.move(label_mode.x,label_mode.y)
-
-    #     self.sync_button = QRadioButton("Sync",self)
-    #     self.sync_button.x = 200
-    #     self.sync_button.y = 40
-    #     self.sync_button.move(self.sync_button.x,self.sync_button.y)
-    #     self.async_button = QRadioButton("Async",self)
-    #     self.async_button.x = 200
-    #     self.async_button.y = 60
-    #     self.async_button.move(self.async_button.x,self.async_button.y)
-
-    #     self.async_button.setChecked(True)
-    #     self.set_mode("Async")
-    #     self.sync_button.toggled.connect(lambda: self.check_mode(self.sync_button))
-    #     self.async_button.toggled.connect(lambda: self.check_mode(self.async_button))
 
     def create_dialog(self):
 
@@ -97,38 +77,19 @@ class GreetForm(QWidget):
 
     def push_message(self):
         if self.message_field.text():
-            message = self.port.name + ": " + self.message_field.text()
-            self.port.write_to_port(message,len(message)) #sending to port
-            self.can_read = True
+            message = bit_stuffing.bit_stuffing(self.message_field.text()) # CONVERTING
+
+            self.port.write_to_port((message),len(message)) #sending to port
+
+            self.can_read = True #for syncronizing
             self.dialog.append("You: " + self.message_field.text())
             self.message_field.setText("")
 
     def read_from_port_and_print(self):     # thread which read all info from port
-            self.dialog.append(self.port.read_from_port().decode())
+            self.dialog.append(self.port.read_from_port())
 
     def initial_ports(self,port_name):
         self.port = SerialPort(port_name)
-
-    # def check_mode(self,b):
-    #     if b.text() == "Sync":
-    #         if b.isChecked()==True:
-    #             self.set_mode("Sync")
-    #     if b.text() == "Async":
-    #         if b.isChecked()==True:
-    #             self.set_mode("Async")
-
-    def set_mode(self, str):
-        if str == "Sync":
-            self.sync_button.setChecked(True)
-            self.mode = "Sync"
-            Help.common_mode = "Sync"
-        if str == "Async":
-            self.async_button.setChecked(True)
-            self.mode = "Async"
-            Help.common_mode = "Async"
-
-    def get_mode(self):
-        return self.mode
 
     def get_rate(self):
         return self.port.baundrate()
@@ -143,16 +104,6 @@ class GreetForm(QWidget):
     def set_can_read(self,value):
         self.can_read = value
 
-
-# def check_settings(form1,form2):
-#     while 1:
-#         if(Help.common_mode == "Sync"):
-#             form2.set_rate(form1.get_rate())
-#         form1.set_mode(Help.common_mode)
-#         form2.set_mode(Help.common_mode)
-#         time.sleep(0.1)
-
-
 def write_read_message(form1,form2):
     while 1:
         if(form1.can_read):
@@ -165,7 +116,6 @@ def main():
 
     form = GreetForm(500,400, "/dev/pts/5")
     form_2 = GreetForm(1000,400, "/dev/pts/6")
-    # _thread.start_new_thread(check_settings,(form, form_2))
     _thread.start_new_thread(write_read_message, (form, form_2))
     _thread.start_new_thread(write_read_message, (form_2, form))
     sys.exit(app.exec())
