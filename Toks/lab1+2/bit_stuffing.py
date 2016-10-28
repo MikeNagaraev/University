@@ -21,6 +21,7 @@ def transform_to_bits_push_to_list(_list):
 	list2 = list(map(to_bits,_list))
 	list2 = list(map(append_stop,list2))
 	list2 = list(map(append_start,list2))
+	print(list2)
 	return list2
 
 def copy_to_bitarray(list):
@@ -65,6 +66,9 @@ def back_convert(bits_array):
 	bits = bits_array #with stop/start/zero 
 	normalbits = []
 
+	#find first '0111110'
+
+
 	# deleting EXTRA zeroes
 	begin = 0
 	end = bits.__len__()
@@ -93,6 +97,7 @@ def back_convert(bits_array):
 	print('DECODE: ')
 	print(message_list)
 	message = ''.join(message_list)
+	message = message[1:] #without '01111110'
 	print('MESSAGE: ')
 	print(message)
 	

@@ -77,8 +77,7 @@ class GreetForm(QWidget):
 
     def push_message(self):
         if self.message_field.text():
-            message = bit_stuffing.bit_stuffing(self.message_field.text()) # CONVERTING
-
+            message = bit_stuffing.bit_stuffing('~'+self.message_field.text()) # CONVERTING
             self.port.write_to_port((message),len(message)) #sending to port
 
             self.can_read = True #for syncronizing
@@ -114,8 +113,8 @@ def write_read_message(form1,form2):
 def main():
     app = QApplication(sys.argv)
 
-    form = GreetForm(500,400, "/dev/pts/5")
-    form_2 = GreetForm(1000,400, "/dev/pts/6")
+    form = GreetForm(500,400, "/dev/pts/2")
+    form_2 = GreetForm(1000,400, "/dev/pts/3")
     _thread.start_new_thread(write_read_message, (form, form_2))
     _thread.start_new_thread(write_read_message, (form_2, form))
     sys.exit(app.exec())
